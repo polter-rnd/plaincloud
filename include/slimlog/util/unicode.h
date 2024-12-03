@@ -73,10 +73,25 @@ constexpr auto count_codepoints(const Char* begin, std::size_t len) -> std::size
     if constexpr (sizeof(Char) != 1) {
         return len;
     } else {
-        std::size_t codepoints = 0;
+        /*std::size_t codepoints = 0;
         for (const auto* end = std::next(begin, len); begin != end; ++codepoints) {
             std::advance(begin, Util::Unicode::code_point_length(begin));
         }
+        return codepoints;*/
+
+        std::mbstate_t state = std::mbstate_t();
+#if defined(_WIN32) and defined(__STDC_WANT_SECURE_LIB__)
+        std::size_t codepoints = 0;
+        if (mbsrtowcs_s(&codepoints, nullptr, codepoints, &begin, 0, &state) != 0) {
+            return 0;
+        }
+        codepoints -= 1;
+#else
+        const auto codepoints = std::mbsrtowcs(nullptr, &begin, 0, &state);
+        if (codepoints == static_cast<std::size_t>(-1)) [[unlikely]] {
+            return 0;
+        }
+#endif
         return codepoints;
     }
 }

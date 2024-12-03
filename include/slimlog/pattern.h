@@ -254,18 +254,6 @@ protected:
     void compile(StringViewType pattern);
 
     /**
-     * @brief Converts a multi-byte string to a single-byte string.
-     *
-     * This function converts a multi-byte string to a single-byte string and appends the result to
-     * the provided destination stream buffer.
-     *
-     * @tparam T Character type of the source string.
-     * @param out Destination stream buffer where the converted string will be appended.
-     * @param data Source multi-byte string to be converted.
-     */
-    static void from_multibyte(auto& out, std::string_view data);
-
-    /**
      * @brief Formats a string according to the specifications.
      *
      * This function formats the source string based on the provided specifications,
@@ -355,10 +343,24 @@ private:
      * @param dst Destination buffer where the string will be written.
      * @param src Source string view to be written.
      * @param specs String specifications, including alignment and fill character.
+     * @param codepoints Number of codepoints the source string contains.
      */
     template<typename StringView>
-    constexpr static void
-    write_padded(auto& dst, StringView&& src, const Placeholder::StringSpecs& specs);
+    constexpr static void write_padded(
+        auto& dst, StringView&& src, const Placeholder::StringSpecs& specs, std::size_t codepoints);
+
+    /**
+     * @brief Converts a multi-byte string to a single-byte string.
+     *
+     * This function converts a multi-byte string to a single-byte string and appends the result to
+     * the provided destination stream buffer.
+     *
+     * @tparam T Character type of the source string.
+     * @param out Destination stream buffer where the converted string will be appended.
+     * @param data Source multi-byte string to be converted.
+     * @param codepoints Number of codepoints the data string contains.
+     */
+    static void from_multibyte(auto& out, std::string_view data, std::size_t codepoints);
 
     std::basic_string<Char> m_pattern;
     std::vector<Placeholder> m_placeholders;
