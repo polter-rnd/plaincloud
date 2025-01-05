@@ -7,28 +7,21 @@
 
 // IWYU pragma: private, include <slimlog/sinks/ostream_sink.h>
 
-#ifndef SLIMLOG_HEADER_ONLY
-#include <slimlog/sinks/ostream_sink.h>
-#endif
-
-#include <slimlog/logger.h>
-#include <slimlog/sink.h>
-
-#include <ostream>
+#include <slimlog/sinks/ostream_sink.h> // IWYU pragma: associated
 
 namespace SlimLog {
 
-template<typename Logger>
-auto OStreamSink<Logger>::message(RecordType& record) -> void
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto OStreamSink<String, Char, BufferSize, Allocator>::message(RecordType& record) -> void
 {
     FormatBufferType buffer;
-    Sink<Logger>::format(buffer, record);
+    this->format(buffer, record);
     buffer.push_back('\n');
     m_ostream.write(buffer.begin(), buffer.size());
 }
 
-template<typename Logger>
-auto OStreamSink<Logger>::flush() -> void
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto OStreamSink<String, Char, BufferSize, Allocator>::flush() -> void
 {
     m_ostream.flush();
 }

@@ -9,44 +9,34 @@
 
 #ifndef SLIMLOG_HEADER_ONLY
 #include <slimlog/logger.h>
-#include <slimlog/sink.h>
 #endif
 
-#include <slimlog/level.h>
-#include <slimlog/location.h>
-#include <slimlog/pattern.h>
-#include <slimlog/policy.h>
-#include <slimlog/record.h>
+#include <slimlog/sink.h> // IWYU pragma: associated
 #include <slimlog/util/os.h>
 
 #include <algorithm> // IWYU pragma: keep
-#include <cstddef>
-#include <initializer_list>
 #include <iterator>
-#include <memory>
-#include <string_view>
 #include <tuple>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 namespace SlimLog {
 
-template<typename Logger>
-auto Sink<Logger>::set_pattern(StringViewType pattern) -> void
-{
-    m_pattern.set_pattern(std::move(pattern));
-}
-
-template<typename Logger>
-auto Sink<Logger>::set_levels(std::initializer_list<std::pair<Level, StringViewType>> levels)
-    -> void
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto FormattableSink<String, Char, BufferSize, Allocator>::set_levels(
+    std::initializer_list<std::pair<Level, StringViewType>> levels) -> void
 {
     m_pattern.set_levels(std::move(levels));
 }
 
-template<typename Logger>
-auto Sink<Logger>::format(FormatBufferType& result, RecordType& record) -> void
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto FormattableSink<String, Char, BufferSize, Allocator>::set_pattern(StringViewType pattern)
+    -> void
+{
+    m_pattern.set_pattern(std::move(pattern));
+}
+
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto FormattableSink<String, Char, BufferSize, Allocator>::format(
+    FormatBufferType& result, RecordType& record) -> void
 {
     m_pattern.format(result, record);
 }
@@ -75,8 +65,7 @@ SinkDriver<Logger, ThreadingPolicy>::~SinkDriver()
 }
 
 template<typename Logger, typename ThreadingPolicy>
-auto SinkDriver<Logger, ThreadingPolicy>::add_sink(const std::shared_ptr<Sink<Logger>>& sink)
-    -> bool
+auto SinkDriver<Logger, ThreadingPolicy>::add_sink(const std::shared_ptr<SinkType>& sink) -> bool
 {
     const typename ThreadingPolicy::WriteLock lock(m_mutex);
     const auto result = m_sinks.insert_or_assign(sink, true).second;
@@ -85,8 +74,7 @@ auto SinkDriver<Logger, ThreadingPolicy>::add_sink(const std::shared_ptr<Sink<Lo
 }
 
 template<typename Logger, typename ThreadingPolicy>
-auto SinkDriver<Logger, ThreadingPolicy>::remove_sink(const std::shared_ptr<Sink<Logger>>& sink)
-    -> bool
+auto SinkDriver<Logger, ThreadingPolicy>::remove_sink(const std::shared_ptr<SinkType>& sink) -> bool
 {
     const typename ThreadingPolicy::WriteLock lock(m_mutex);
     if (m_sinks.erase(sink) > 0) {
@@ -98,7 +86,7 @@ auto SinkDriver<Logger, ThreadingPolicy>::remove_sink(const std::shared_ptr<Sink
 
 template<typename Logger, typename ThreadingPolicy>
 auto SinkDriver<Logger, ThreadingPolicy>::set_sink_enabled(
-    const std::shared_ptr<Sink<Logger>>& sink, bool enabled) -> bool
+    const std::shared_ptr<SinkType>& sink, bool enabled) -> bool
 {
     const typename ThreadingPolicy::WriteLock lock(m_mutex);
     if (const auto itr = m_sinks.find(sink); itr != m_sinks.end()) {
@@ -110,8 +98,8 @@ auto SinkDriver<Logger, ThreadingPolicy>::set_sink_enabled(
 }
 
 template<typename Logger, typename ThreadingPolicy>
-auto SinkDriver<Logger, ThreadingPolicy>::sink_enabled(
-    const std::shared_ptr<Sink<Logger>>& sink) const -> bool
+auto SinkDriver<Logger, ThreadingPolicy>::sink_enabled(const std::shared_ptr<SinkType>& sink) const
+    -> bool
 {
     const typename ThreadingPolicy::ReadLock lock(m_mutex);
     if (const auto itr = m_sinks.find(sink); itr != m_sinks.end()) {

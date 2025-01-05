@@ -7,32 +7,15 @@
 
 // IWYU pragma: private, include <slimlog/pattern.h>
 
-#ifndef SLIMLOG_HEADER_ONLY
-#include <slimlog/pattern.h>
-#endif
-
-#include <slimlog/format.h>
-#include <slimlog/level.h>
-#include <slimlog/record.h>
+#include <slimlog/pattern.h> // IWYU pragma: associated
 #include <slimlog/util/types.h>
 #include <slimlog/util/unicode.h>
 
 #include <algorithm>
-#include <array>
-#include <chrono>
 #include <climits>
-#include <concepts>
-#include <cstddef>
 #include <functional>
-#include <initializer_list>
 #include <iterator>
 #include <limits>
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <utility>
-#include <variant>
-#include <vector>
 
 namespace SlimLog {
 
@@ -144,7 +127,7 @@ auto Pattern<Char>::format(auto& out, Record<Char, StringType>& record) -> void
         case Placeholder::Type::Message:
             std::visit(
                 Util::Types::Overloaded{
-                    [&out, &value = item.value](std::reference_wrapper<StringType> arg) {
+                    [&out, &value = item.value](std::reference_wrapper<const StringType> arg) {
                         if constexpr (Detail::HasConvertString<Char, StringType>) {
                             format_string(
                                 out,

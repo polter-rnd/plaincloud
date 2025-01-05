@@ -7,12 +7,7 @@
 
 // IWYU pragma: private, include <slimlog/sinks/file_sink.h>
 
-#ifndef SLIMLOG_HEADER_ONLY
-#include <slimlog/sinks/file_sink.h>
-#endif
-
-#include <slimlog/logger.h>
-#include <slimlog/sink.h>
+#include <slimlog/sinks/file_sink.h> // IWYU pragma: associated
 
 #if defined(_WIN32) && defined(__STDC_WANT_SECURE_LIB__)
 // In addition to <cstdio> below for fopen_s() on Windows
@@ -20,16 +15,13 @@
 #endif
 
 #include <cerrno>
-#include <cstdio>
-#include <memory>
 #include <string>
-#include <string_view>
 #include <system_error>
 
 namespace SlimLog {
 
-template<typename Logger>
-auto FileSink<Logger>::open(std::string_view filename) -> void
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto FileSink<String, Char, BufferSize, Allocator>::open(std::string_view filename) -> void
 {
 #if defined(_WIN32) && defined(__STDC_WANT_SECURE_LIB__)
     FILE* fp;
@@ -43,19 +35,19 @@ auto FileSink<Logger>::open(std::string_view filename) -> void
     }
 }
 
-template<typename Logger>
-auto FileSink<Logger>::message(RecordType& record) -> void
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto FileSink<String, Char, BufferSize, Allocator>::message(RecordType& record) -> void
 {
     FormatBufferType buffer;
-    Sink<Logger>::format(buffer, record);
+    this->format(buffer, record);
     buffer.push_back('\n');
     if (std::fwrite(buffer.data(), buffer.size(), 1, m_fp.get()) != 1) {
         throw std::system_error({errno, std::system_category()}, "Failed writing to log file");
     }
 }
 
-template<typename Logger>
-auto FileSink<Logger>::flush() -> void
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+auto FileSink<String, Char, BufferSize, Allocator>::flush() -> void
 {
     if (std::fflush(m_fp.get()) != 0) {
         throw std::system_error({errno, std::system_category()}, "Failed flush to log file");

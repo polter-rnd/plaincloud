@@ -5,9 +5,10 @@
 
 #pragma once
 
-#include <slimlog/logger.h>
 #include <slimlog/sink.h>
+#include <slimlog/util/types.h>
 
+#include <string_view>
 #include <utility>
 
 namespace SlimLog {
@@ -19,11 +20,10 @@ namespace SlimLog {
  *
  * @tparam Logger The logger class type intended for use with this sink.
  */
-template<typename Logger>
-class NullSink : public Sink<Logger> {
+template<typename String, typename Char = Util::Types::UnderlyingCharType<String>>
+class NullSink : public Sink<String, Char> {
 public:
-    using typename Sink<Logger>::RecordType;
-    using typename Sink<Logger>::FormatBufferType;
+    using typename Sink<String, Char>::RecordType;
 
     /**
      * @brief Constructs a new NullSink object.
@@ -33,7 +33,7 @@ public:
      */
     template<typename... Args>
     explicit NullSink(Args&&... args)
-        : Sink<Logger>(std::forward<Args>(args)...)
+        : Sink<String, Char>(std::forward<Args>(args)...)
     {
     }
 

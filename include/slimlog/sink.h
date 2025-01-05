@@ -11,7 +11,9 @@
 #include <slimlog/pattern.h>
 #include <slimlog/policy.h>
 #include <slimlog/record.h>
+#include <slimlog/util/types.h>
 
+#include <cstddef>
 #include <initializer_list>
 #include <memory>
 #include <string_view>
@@ -25,23 +27,69 @@ namespace SlimLog {
 /**
  * @brief Base abstract sink class.
  *
- * A sink represents a logging backend that processes and outputs log messages.
+ * A sink is a destination for log messages.
  *
- * @tparam Logger The logger class type intended for use with this sink.
+ * @tparam String String type for log messages.
+ * @tparam Char Character type for the string.
  */
-template<typename Logger>
+template<typename String, typename Char = Util::Types::UnderlyingCharType<String>>
 class Sink {
 public:
-    /** @brief String type for log messages. */
-    using StringType = typename Logger::StringType;
-    /** @brief String view type for log categories. */
-    using StringViewType = typename Logger::StringViewType;
-    /** @brief Character type for log messages. */
-    using CharType = typename Logger::CharType;
-    /** @brief Buffer type used for formatting log messages. */
-    using FormatBufferType = FormatBuffer<CharType, Logger::BufferSize, std::allocator<CharType>>;
     /** @brief Log record type. */
-    using RecordType = Record<CharType, StringType>;
+    using RecordType = Record<Char, String>;
+
+    /** @brief Default constructor. */
+    Sink() = default;
+    /** @brief Copy constructor. */
+    Sink(Sink const&) = default;
+    /** @brief Move constructor. */
+    Sink(Sink&&) noexcept = default;
+
+    /** @brief Assignment operator. */
+    auto operator=(Sink const&) -> Sink& = default;
+    /** @brief Move assignment operator. */
+    auto operator=(Sink&&) noexcept -> Sink& = default;
+
+    /** @brief Destructor. */
+    virtual ~Sink() = default;
+
+    /**
+     * @brief Processes a log record.
+     *
+     * Formats and outputs the log record.
+     *
+     * @param record The log record to process.
+     */
+    virtual auto message(RecordType& record) -> void = 0;
+
+    /**
+     * @brief Flushes any buffered log messages.
+     */
+    virtual auto flush() -> void = 0;
+};
+
+/**
+ * @brief Abstract formattable sink class.
+ *
+ * A sink that supports custom message formatting.
+ * Allocates another buffer for message formatting.
+ *
+ * @tparam String String type for log messages.
+ * @tparam Char Character type for the string.
+ * @tparam BufferSize Size of the internal pre-allocated buffer.
+ * @tparam Allocator Allocator type for the internal buffer.
+ */
+template<typename String, typename Char, std::size_t BufferSize, typename Allocator>
+class FormattableSink : public Sink<String, Char> {
+public:
+    /** @brief String type for log messages. */
+    using StringType = String;
+    /** @brief Raw string view type. */
+    using StringViewType = std::basic_string_view<Char>;
+    /** @brief Buffer type used for log message formatting. */
+    using FormatBufferType = FormatBuffer<Char, BufferSize, Allocator>;
+    /** @brief Log record type. */
+    using RecordType = Record<Char, String>;
 
     /**
      * @brief Constructs a new Sink object.
@@ -66,24 +114,11 @@ public:
      * @param args Optional pattern and list of log levels.
      */
     template<typename... Args>
-    explicit Sink(Args&&... args)
+    explicit FormattableSink(Args&&... args)
         // NOLINTNEXTLINE(*-array-to-pointer-decay,*-no-array-decay)
         : m_pattern(std::forward<Args>(args)...)
     {
     }
-
-    /** @brief Copy constructor. */
-    Sink(Sink const&) = default;
-    /** @brief Move constructor. */
-    Sink(Sink&&) noexcept = default;
-
-    /** @brief Assignment operator. */
-    auto operator=(Sink const&) -> Sink& = default;
-    /** @brief Move assignment operator. */
-    auto operator=(Sink&&) noexcept -> Sink& = default;
-
-    /** @brief Destructor. */
-    virtual ~Sink() = default;
 
     /**
      * @brief Sets the log message pattern.
@@ -113,20 +148,6 @@ public:
      */
     virtual auto set_levels(std::initializer_list<std::pair<Level, StringViewType>> levels) -> void;
 
-    /**
-     * @brief Processes a log record.
-     *
-     * Formats and outputs the log record.
-     *
-     * @param record The log record to process.
-     */
-    virtual auto message(RecordType& record) -> void = 0;
-
-    /**
-     * @brief Flushes any buffered log messages.
-     */
-    virtual auto flush() -> void = 0;
-
 protected:
     /**
      * @brief Formats a log record according to the pattern.
@@ -137,7 +158,18 @@ protected:
     auto format(FormatBufferType& result, RecordType& record) -> void;
 
 private:
-    Pattern<CharType> m_pattern;
+    Pattern<Char> m_pattern;
+};
+
+/**
+ * @brief Checks if the specified type is a formattable sink.
+ *
+ * @tparam T Type to check.
+ */
+template<class T>
+concept IsFormattableSink = requires(const T& arg) {
+    []<typename String, typename Char, std::size_t BufferSize, typename Allocator>(
+        const FormattableSink<String, Char, BufferSize, Allocator>&) {}(arg);
 };
 
 /**
@@ -152,14 +184,16 @@ private:
 template<typename Logger, typename ThreadingPolicy>
 class SinkDriver final {
 public:
-    /** @brief Character type for log messages. */
-    using CharType = typename Logger::CharType;
     /** @brief String view type for log category. */
     using StringViewType = typename Logger::StringViewType;
     /** @brief Buffer type used for log message formatting. */
-    using FormatBufferType = typename Sink<Logger>::FormatBufferType;
+    using FormatBufferType = typename Logger::FormatBufferType;
+    /** @brief Base sink type for the logger. */
+    using SinkType = typename Logger::SinkType;
     /** @brief Log record type. */
-    using RecordType = typename Sink<Logger>::RecordType;
+    using RecordType = typename SinkType::RecordType;
+    /** @brief Log record string view type. */
+    using RecordStringViewType = typename RecordType::StringViewType;
 
     /**
      * @brief Constructs a new SinkDriver object.
@@ -186,7 +220,7 @@ public:
      * @return \b true if the sink was actually inserted.
      * @return \b false if the sink is already present in this logger.
      */
-    auto add_sink(const std::shared_ptr<Sink<Logger>>& sink) -> bool;
+    auto add_sink(const std::shared_ptr<SinkType>& sink) -> bool;
 
     /**
      * @brief Creates and emplaces a new sink.
@@ -197,7 +231,7 @@ public:
      * @return Shared pointer to the created sink or `nullptr` in case of failure.
      */
     template<typename T, typename... Args>
-    auto add_sink(Args&&... args) -> std::shared_ptr<Sink<Logger>>
+    auto add_sink(Args&&... args) -> std::shared_ptr<SinkType>
     {
         auto sink = std::make_shared<T>(std::forward<Args>(args)...);
         return add_sink(sink) ? sink : nullptr;
@@ -210,7 +244,7 @@ public:
      * @return \b true if the sink was actually removed.
      * @return \b false if the sink does not exist in this logger.
      */
-    auto remove_sink(const std::shared_ptr<Sink<Logger>>& sink) -> bool;
+    auto remove_sink(const std::shared_ptr<SinkType>& sink) -> bool;
 
     /**
      * @brief Enables or disables a sink for this logger.
@@ -220,7 +254,7 @@ public:
      * @return \b true if the sink exists and is enabled.
      * @return \b false if the sink does not exist in this logger.
      */
-    auto set_sink_enabled(const std::shared_ptr<Sink<Logger>>& sink, bool enabled) -> bool;
+    auto set_sink_enabled(const std::shared_ptr<SinkType>& sink, bool enabled) -> bool;
 
     /**
      * @brief Checks if a sink is enabled.
@@ -229,7 +263,7 @@ public:
      * @return \b true if the sink is enabled.
      * @return \b false if the sink is disabled.
      */
-    auto sink_enabled(const std::shared_ptr<Sink<Logger>>& sink) const -> bool;
+    auto sink_enabled(const std::shared_ptr<SinkType>& sink) const -> bool;
 
     /**
      * @brief Emits a new callback-based log message if it fits the specified logging level.
@@ -274,7 +308,7 @@ public:
                 if constexpr (std::is_invocable_v<T, BufferRefType, Args...>) {
                     // Callable with buffer argument: message will be stored in buffer.
                     callback(buffer, std::forward<Args>(args)...);
-                    record.message = RecordStringView{buffer.data(), buffer.size()};
+                    record.message = RecordStringViewType{buffer.data(), buffer.size()};
                 } else if constexpr (std::is_invocable_v<T, Args...>) {
                     using RetType = typename std::invoke_result_t<T, Args...>;
                     if constexpr (std::is_void_v<RetType>) {
@@ -284,16 +318,16 @@ public:
                     } else {
                         // Non-void callable without arguments: message is the return value
                         auto message = callback(std::forward<Args>(args)...);
-                        if constexpr (std::is_convertible_v<RetType, RecordStringView<CharType>>) {
-                            record.message = RecordStringView<CharType>{std::move(message)};
+                        if constexpr (std::is_convertible_v<RetType, RecordStringViewType>) {
+                            record.message = RecordStringViewType{std::move(message)};
                         } else {
                             record.message = message;
                         }
                     }
-                } else if constexpr (std::is_convertible_v<T, RecordStringView<CharType>>) {
+                } else if constexpr (std::is_convertible_v<T, RecordStringViewType>) {
                     // Non-invocable argument: argument is the message itself
                     // NOLINTNEXTLINE(*-array-to-pointer-decay,*-no-array-decay)
-                    record.message = RecordStringView<CharType>{std::forward<T>(callback)};
+                    record.message = RecordStringViewType{std::forward<T>(callback)};
                 } else {
                     record.message = callback;
                 }
@@ -361,8 +395,8 @@ private:
     const Logger* m_logger;
     SinkDriver* m_parent;
     std::vector<SinkDriver*> m_children;
-    std::unordered_map<Sink<Logger>*, const Logger*> m_effective_sinks;
-    std::unordered_map<std::shared_ptr<Sink<Logger>>, bool> m_sinks;
+    std::unordered_map<SinkType*, const Logger*> m_effective_sinks;
+    std::unordered_map<std::shared_ptr<SinkType>, bool> m_sinks;
     mutable ThreadingPolicy::Mutex m_mutex;
 }; // namespace SlimLog
 

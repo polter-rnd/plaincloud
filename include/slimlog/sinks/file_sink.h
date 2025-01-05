@@ -7,6 +7,7 @@
 
 #include <slimlog/logger.h>
 #include <slimlog/sink.h>
+#include <slimlog/util/types.h>
 
 #include <cstdio>
 #include <memory>
@@ -22,12 +23,15 @@ namespace SlimLog {
  *
  * @tparam Logger The logger class type intended for use with this sink.
  */
-template<typename Logger>
-class FileSink : public Sink<Logger> {
+template<
+    typename String,
+    typename Char = Util::Types::UnderlyingCharType<String>,
+    std::size_t BufferSize = DefaultBufferSize,
+    typename Allocator = std::allocator<Char>>
+class FileSink : public FormattableSink<String, Char, BufferSize, Allocator> {
 public:
-    using typename Sink<Logger>::CharType;
-    using typename Sink<Logger>::FormatBufferType;
-    using typename Sink<Logger>::RecordType;
+    using typename FormattableSink<String, Char, BufferSize, Allocator>::RecordType;
+    using typename FormattableSink<String, Char, BufferSize, Allocator>::FormatBufferType;
 
     /**
      * @brief Constructs a new FileSink object.
@@ -38,7 +42,7 @@ public:
      */
     template<typename... Args>
     explicit FileSink(std::string_view filename, Args&&... args)
-        : Sink<Logger>(std::forward<Args>(args)...)
+        : FormattableSink<String, Char, BufferSize, Allocator>(std::forward<Args>(args)...)
     {
         open(filename);
     }

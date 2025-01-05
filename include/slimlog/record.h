@@ -115,13 +115,17 @@ struct RecordLocation {
  */
 template<typename Char, typename String>
 struct Record {
+    /** @brief String reference type. */
+    using StringRefType = std::reference_wrapper<const String>;
+    /** @brief String view type. */
+    using StringViewType = RecordStringView<Char>;
+
     Level level = {}; ///< Log level.
     RecordLocation location = {}; ///< Source code location.
-    RecordStringView<Char> category = {}; ///< Log category.
+    StringViewType category = {}; ///< Log category.
     std::size_t thread_id = {}; ///< Thread ID.
     RecordTime time = {}; ///< Record time.
-    std::variant<std::reference_wrapper<String>, RecordStringView<Char>> message
-        = RecordStringView<Char>{}; ///< Log message.
+    std::variant<StringRefType, StringViewType> message = StringViewType{}; ///< Log message.
 };
 
 } // namespace SlimLog

@@ -7,9 +7,7 @@
 
 // IWYU pragma: private, include <slimlog/format.h>
 
-#ifndef SLIMLOG_HEADER_ONLY
-#include <slimlog/format.h>
-#endif
+#include <slimlog/format.h> // IWYU pragma: associated
 
 #ifdef SLIMLOG_FMTLIB
 #if __has_include(<fmt/base.h>)
@@ -17,16 +15,9 @@
 #else
 #include <fmt/core.h>
 #endif
-
-#include <iterator>
-#include <type_traits>
 #else
 #include <array>
 #endif
-
-#include <chrono>
-#include <string_view>
-#include <utility>
 
 namespace SlimLog {
 

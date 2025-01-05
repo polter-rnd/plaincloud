@@ -22,9 +22,14 @@
 namespace SlimLog {
 
 /**
- * @brief Default buffer size for log messages.
+ * @brief Default buffer size for raw log messages.
  */
 static constexpr auto DefaultBufferSize = 256U;
+
+/**
+ * @brief Default threading policy for logger sinks.
+ */
+using DefaultThreadingPolicy = MultiThreadedPolicy;
 
 /**
  * @brief Logger front-end class.
@@ -34,13 +39,15 @@ static constexpr auto DefaultBufferSize = 256U;
  * @tparam String Type used for logging messages (e.g., `std::string`).
  * @tparam Char Underlying character type for the string.
  * @tparam ThreadingPolicy Threading policy for sink operations.
- * @tparam StaticBufferSize Size of the internal pre-allocated buffer.
+ * @tparam BufferSize Size of the internal pre-allocated buffer.
+ * @tparam Allocator Allocator type for the internal buffer.
  */
 template<
     typename String,
     typename Char = Util::Types::UnderlyingCharType<String>,
-    typename ThreadingPolicy = MultiThreadedPolicy,
-    std::size_t StaticBufferSize = DefaultBufferSize>
+    typename ThreadingPolicy = DefaultThreadingPolicy,
+    std::size_t BufferSize = DefaultBufferSize,
+    typename Allocator = std::allocator<Char>>
 class Logger {
 public:
     /** @brief String type for log messages. */
@@ -49,8 +56,10 @@ public:
     using CharType = Char;
     /** @brief String view type for log categories. */
     using StringViewType = std::basic_string_view<CharType>;
-    /** @brief Size of the internal buffer. */
-    static constexpr auto BufferSize = StaticBufferSize;
+    /** @brief Base sink type for the logger. */
+    using SinkType = Sink<String, Char>;
+    /** @brief Buffer type used for log message formatting. */
+    using FormatBufferType = FormatBuffer<Char, BufferSize, Allocator>;
 
     Logger(Logger const&) = delete;
     Logger(Logger&&) = delete;
@@ -114,23 +123,47 @@ public:
      * @param sink Shared pointer to the sink.
      * @return true if the sink was added, false if it already exists.
      */
-    auto add_sink(const std::shared_ptr<Sink<Logger>>& sink) -> bool
+    auto add_sink(const std::shared_ptr<SinkType>& sink) -> bool
     {
         return m_sinks.add_sink(sink);
+    }
+
+    /**
+     * @brief Creates and adds a new formattable sink to this logger.
+     *
+     * @tparam T Sink type template (e.g., OStreamSink).
+     * @tparam SinkBufferSize Size of the internal buffer for the sink.
+     * @tparam SinkAllocator Allocator type for the sink buffer.
+     * @tparam Args Argument types for the sink constructor.
+     * @param args Arguments forwarded to the sink constructor.
+     * @return Shared pointer to the created sink.
+     */
+    template<
+        template<typename, typename, std::size_t, typename>
+        typename T,
+        std::size_t SinkBufferSize = DefaultBufferSize,
+        typename SinkAllocator = Allocator,
+        typename... Args>
+        requires(IsFormattableSink<T<String, Char, SinkBufferSize, SinkAllocator>>)
+    auto add_sink(Args&&... args) -> std::shared_ptr<SinkType>
+    {
+        return m_sinks.template add_sink<T<String, Char, SinkBufferSize, SinkAllocator>>(
+            std::forward<Args>(args)...);
     }
 
     /**
      * @brief Creates and adds a new sink to this logger.
      *
      * @tparam T Sink type template (e.g., OStreamSink).
-     * @tparam Args Constructor argument types for the sink.
+     * @tparam Args Argument types for the sink constructor.
      * @param args Arguments forwarded to the sink constructor.
      * @return Shared pointer to the created sink.
      */
-    template<template<typename> class T, typename... Args>
-    auto add_sink(Args&&... args) -> std::shared_ptr<Sink<Logger>>
+    template<template<typename, typename> class T, typename... Args>
+        requires(!IsFormattableSink<T<String, Char>>)
+    auto add_sink(Args&&... args) -> std::shared_ptr<SinkType>
     {
-        return m_sinks.template add_sink<T<Logger>>(std::forward<Args>(args)...);
+        return m_sinks.template add_sink<T<String, Char>>(std::forward<Args>(args)...);
     }
 
     /**
@@ -140,7 +173,7 @@ public:
      * @return \b true if the sink was actually removed.
      * @return \b false if the sink does not exist in this logger.
      */
-    auto remove_sink(const std::shared_ptr<Sink<Logger>>& sink) -> bool
+    auto remove_sink(const std::shared_ptr<SinkType>& sink) -> bool
     {
         return m_sinks.remove_sink(sink);
     }
@@ -153,7 +186,7 @@ public:
      * @return \b true if the sink exists and is enabled.
      * @return \b false if the sink does not exist in this logger.
      */
-    auto set_sink_enabled(const std::shared_ptr<Sink<Logger>>& sink, bool enabled) -> bool
+    auto set_sink_enabled(const std::shared_ptr<SinkType>& sink, bool enabled) -> bool
     {
         return m_sinks.set_sink_enabled(sink, enabled);
     }
@@ -165,7 +198,7 @@ public:
      * @return \b true if the sink is enabled.
      * @return \b false if the sink is disabled.
      */
-    [[nodiscard]] auto sink_enabled(const std::shared_ptr<Sink<Logger>>& sink) const -> bool
+    [[nodiscard]] auto sink_enabled(const std::shared_ptr<SinkType>& sink) const -> bool
     {
         return m_sinks.sink_enabled(sink);
     }
@@ -238,7 +271,7 @@ public:
     void
     message(Level level, Format<CharType, std::type_identity_t<Args>...> fmt, Args&&... args) const
     {
-        auto callback = [&fmt = fmt.fmt()](auto& buffer, Args&&... args) {
+        auto callback = [&fmt = fmt.fmt()](FormatBufferType& buffer, Args&&... args) {
             buffer.format(fmt, std::forward<Args>(args)...);
         };
 

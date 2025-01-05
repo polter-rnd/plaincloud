@@ -7,8 +7,12 @@
 
 #include <slimlog/logger.h>
 #include <slimlog/sink.h>
+#include <slimlog/util/types.h>
 
+#include <cstddef>
+#include <memory>
 #include <ostream>
+#include <string_view>
 #include <utility>
 
 namespace SlimLog {
@@ -20,12 +24,15 @@ namespace SlimLog {
  *
  * @tparam Logger The logger class type intended for use with this sink.
  */
-template<typename Logger>
-class OStreamSink : public Sink<Logger> {
+template<
+    typename String,
+    typename Char = Util::Types::UnderlyingCharType<String>,
+    std::size_t BufferSize = DefaultBufferSize,
+    typename Allocator = std::allocator<Char>>
+class OStreamSink : public FormattableSink<String, Char, BufferSize, Allocator> {
 public:
-    using typename Sink<Logger>::CharType;
-    using typename Sink<Logger>::FormatBufferType;
-    using typename Sink<Logger>::RecordType;
+    using typename FormattableSink<String, Char, BufferSize, Allocator>::RecordType;
+    using typename FormattableSink<String, Char, BufferSize, Allocator>::FormatBufferType;
 
     /**
      * @brief Constructs a new OStreamSink object.
@@ -35,8 +42,8 @@ public:
      * @param args Optional pattern and list of log levels.
      */
     template<typename... Args>
-    explicit OStreamSink(const std::basic_ostream<CharType>& ostream, Args&&... args)
-        : Sink<Logger>(std::forward<Args>(args)...)
+    explicit OStreamSink(const std::basic_ostream<Char>& ostream, Args&&... args)
+        : FormattableSink<String, Char, BufferSize, Allocator>(std::forward<Args>(args)...)
         , m_ostream(ostream.rdbuf())
     {
     }
@@ -49,8 +56,8 @@ public:
      * @param args Optional pattern and list of log levels.
      */
     template<typename... Args>
-    explicit OStreamSink(std::basic_streambuf<CharType>* streambuf, Args&&... args)
-        : Sink<Logger>(std::forward<Args>(args)...)
+    explicit OStreamSink(std::basic_streambuf<Char>* streambuf, Args&&... args)
+        : FormattableSink<String, Char, BufferSize, Allocator>(std::forward<Args>(args)...)
         , m_ostream(streambuf)
     {
     }
@@ -70,7 +77,7 @@ public:
     auto flush() -> void override;
 
 private:
-    std::basic_ostream<CharType> m_ostream;
+    std::basic_ostream<Char> m_ostream;
 };
 
 } // namespace SlimLog

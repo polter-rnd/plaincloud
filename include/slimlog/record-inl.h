@@ -7,15 +7,9 @@
 
 // IWYU pragma: private, include <slimlog/record.h>
 
-#ifndef SLIMLOG_HEADER_ONLY
-#include <slimlog/record.h>
-#endif
-
+#include <slimlog/record.h> // IWYU pragma: associated
 #include <slimlog/util/unicode.h>
 
-#include <atomic>
-#include <cstddef>
-#include <string_view>
 #include <utility>
 
 namespace SlimLog {
