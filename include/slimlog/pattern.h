@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <slimlog/format.h>
-#include <slimlog/level.h>
-#include <slimlog/record.h>
+#include "slimlog/format.h"
+#include "slimlog/level.h"
+#include "slimlog/record.h"
 
 #include <array>
 #include <chrono>
@@ -371,5 +371,5 @@ private:
 } // namespace SlimLog
 
 #ifdef SLIMLOG_HEADER_ONLY
-#include <slimlog/pattern-inl.h> // IWYU pragma: keep
+#include "slimlog/pattern-inl.h" // IWYU pragma: keep
 #endif

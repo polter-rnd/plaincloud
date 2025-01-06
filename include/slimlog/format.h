@@ -5,6 +5,10 @@
 
 #pragma once
 
+#include "slimlog/location.h"
+#include "slimlog/util/buffer.h"
+#include "slimlog/util/types.h"
+
 #ifdef SLIMLOG_FMTLIB
 #if __has_include(<fmt/base.h>)
 #include <fmt/base.h>
@@ -17,10 +21,6 @@
 #else
 #include <format>
 #endif
-
-#include <slimlog/location.h>
-#include <slimlog/util/buffer.h>
-#include <slimlog/util/types.h>
 
 #include <chrono>
 #include <concepts>
@@ -367,5 +367,5 @@ struct std::formatter<SlimLog::FormatValue<T, Char>, Char> { // NOLINT(cert-dcl5
 #endif
 
 #ifdef SLIMLOG_HEADER_ONLY
-#include <slimlog/format-inl.h> // IWYU pragma: keep
+#include "slimlog/format-inl.h" // IWYU pragma: keep
 #endif

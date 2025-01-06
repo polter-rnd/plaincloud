@@ -5,14 +5,14 @@
 
 #pragma once
 
-// IWYU pragma: private, include <slimlog/sink.h>
+// IWYU pragma: private, include "slimlog/sink.h"
+
+#include "slimlog/sink.h" // IWYU pragma: associated
+#include "slimlog/util/os.h"
 
 #ifndef SLIMLOG_HEADER_ONLY
-#include <slimlog/logger.h>
+#include "slimlog/logger.h"
 #endif
-
-#include <slimlog/sink.h> // IWYU pragma: associated
-#include <slimlog/util/os.h>
 
 #include <algorithm> // IWYU pragma: keep
 #include <iterator>

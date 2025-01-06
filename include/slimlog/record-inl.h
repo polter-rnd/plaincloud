@@ -5,10 +5,10 @@
 
 #pragma once
 
-// IWYU pragma: private, include <slimlog/record.h>
+// IWYU pragma: private, include "slimlog/record.h"
 
-#include <slimlog/record.h> // IWYU pragma: associated
-#include <slimlog/util/unicode.h>
+#include "slimlog/record.h" // IWYU pragma: associated
+#include "slimlog/util/unicode.h"
 
 #include <utility>
 

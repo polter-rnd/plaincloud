@@ -18,7 +18,7 @@
 #include <fmt/core.h>
 #endif
 #else
-#include <slimlog/util/types.h>
+#include "slimlog/util/types.h"
 
 #include <iterator>
 #endif

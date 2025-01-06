@@ -1,22 +1,22 @@
-#include <slimlog/format.h>
-#include <slimlog/logger.h>
-#include <slimlog/pattern.h>
-#include <slimlog/policy.h>
-#include <slimlog/record.h>
-#include <slimlog/sink.h>
-#include <slimlog/sinks/file_sink.h>
-#include <slimlog/sinks/null_sink.h>
-#include <slimlog/sinks/ostream_sink.h>
+#include "slimlog/format.h"
+#include "slimlog/logger.h"
+#include "slimlog/pattern.h"
+#include "slimlog/policy.h"
+#include "slimlog/record.h"
+#include "slimlog/sink.h"
+#include "slimlog/sinks/file_sink.h"
+#include "slimlog/sinks/null_sink.h"
+#include "slimlog/sinks/ostream_sink.h"
 
 #ifndef SLIMLOG_HEADER_ONLY
 // IWYU pragma: begin_keep
-#include <slimlog/format-inl.h>
-#include <slimlog/pattern-inl.h>
-#include <slimlog/record-inl.h>
-#include <slimlog/sink-inl.h>
-#include <slimlog/sinks/file_sink-inl.h>
-#include <slimlog/sinks/null_sink-inl.h>
-#include <slimlog/sinks/ostream_sink-inl.h>
+#include "slimlog/format-inl.h"
+#include "slimlog/pattern-inl.h"
+#include "slimlog/record-inl.h"
+#include "slimlog/sink-inl.h"
+#include "slimlog/sinks/file_sink-inl.h"
+#include "slimlog/sinks/null_sink-inl.h"
+#include "slimlog/sinks/ostream_sink-inl.h"
 // IWYU pragma: end_keep
 #endif
 

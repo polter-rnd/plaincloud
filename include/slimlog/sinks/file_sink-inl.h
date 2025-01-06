@@ -5,9 +5,9 @@
 
 #pragma once
 
-// IWYU pragma: private, include <slimlog/sinks/file_sink.h>
+// IWYU pragma: private, include "slimlog/sinks/file_sink.h"
 
-#include <slimlog/sinks/file_sink.h> // IWYU pragma: associated
+#include "slimlog/sinks/file_sink.h" // IWYU pragma: associated
 
 #if defined(_WIN32) && defined(__STDC_WANT_SECURE_LIB__)
 // In addition to <cstdio> below for fopen_s() on Windows

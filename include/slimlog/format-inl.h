@@ -5,9 +5,9 @@
 
 #pragma once
 
-// IWYU pragma: private, include <slimlog/format.h>
+// IWYU pragma: private, include "slimlog/format.h"
 
-#include <slimlog/format.h> // IWYU pragma: associated
+#include "slimlog/format.h" // IWYU pragma: associated
 
 #ifdef SLIMLOG_FMTLIB
 #if __has_include(<fmt/base.h>)

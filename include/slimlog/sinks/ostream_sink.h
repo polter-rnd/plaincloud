@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <slimlog/logger.h>
-#include <slimlog/sink.h>
-#include <slimlog/util/types.h>
+#include "slimlog/logger.h"
+#include "slimlog/sink.h"
+#include "slimlog/util/types.h"
 
 #include <cstddef>
 #include <memory>
@@ -83,5 +83,5 @@ private:
 } // namespace SlimLog
 
 #ifdef SLIMLOG_HEADER_ONLY
-#include <slimlog/sinks/ostream_sink-inl.h> // IWYU pragma: keep
+#include "slimlog/sinks/ostream_sink-inl.h" // IWYU pragma: keep
 #endif

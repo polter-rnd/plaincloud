@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <slimlog/util/types.h>
+#include "slimlog/util/types.h"
 
 #include <array>
 #include <cassert>

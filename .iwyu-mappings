@@ -20,10 +20,5 @@
     { symbol: [ "std::reference_wrapper", "private", "<functional>", "public" ] },
     { symbol: [ "std::copy", "private", "<algorithm>", "public" ] },
     # Bug on fmtlib: format_error::~format_error is not from "format.h"
-    { include: [ "\"format.h\"", "private", "<slimlog/format.h>", "public" ] },
-    { include: [ "\"slimlog/format.h\"", "private", "<slimlog/format.h>", "public" ] },
-    { include: [ "\"slimlog/level.h\"", "private", "<slimlog/level.h>", "public" ] },
-    { include: [ "\"slimlog/record.h\"", "private", "<slimlog/record.h>", "public" ] },
-    { include: [ "\"slimlog/location.h\"", "private", "<slimlog/location.h>", "public" ] },
-    { include: [ "\"slimlog/policy.h\"", "private", "<slimlog/policy.h>", "public" ] },
+    { include: [ "\"format.h\"", "private", "\"slimlog/format.h\"", "public" ] },
 ]

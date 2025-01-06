@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <slimlog/format.h>
-#include <slimlog/level.h>
-#include <slimlog/location.h>
-#include <slimlog/pattern.h>
-#include <slimlog/policy.h>
-#include <slimlog/record.h>
-#include <slimlog/util/types.h>
+#include "slimlog/format.h"
+#include "slimlog/level.h"
+#include "slimlog/location.h"
+#include "slimlog/pattern.h"
+#include "slimlog/policy.h"
+#include "slimlog/record.h"
+#include "slimlog/util/types.h"
 
 #include <cstddef>
 #include <initializer_list>
@@ -403,5 +403,5 @@ private:
 } // namespace SlimLog
 
 #ifdef SLIMLOG_HEADER_ONLY
-#include <slimlog/sink-inl.h> // IWYU pragma: keep
+#include "slimlog/sink-inl.h" // IWYU pragma: keep
 #endif

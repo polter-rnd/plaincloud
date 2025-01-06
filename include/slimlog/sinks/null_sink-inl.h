@@ -5,9 +5,9 @@
 
 #pragma once
 
-// IWYU pragma: private, include <slimlog/sinks/null_sink.h>
+// IWYU pragma: private, include "slimlog/sinks/null_sink.h"
 
-#include <slimlog/sinks/null_sink.h> // IWYU pragma: associated
+#include "slimlog/sinks/null_sink.h" // IWYU pragma: associated
 
 namespace SlimLog {
 

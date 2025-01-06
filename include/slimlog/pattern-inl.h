@@ -5,11 +5,11 @@
 
 #pragma once
 
-// IWYU pragma: private, include <slimlog/pattern.h>
+// IWYU pragma: private, include "slimlog/pattern.h"
 
-#include <slimlog/pattern.h> // IWYU pragma: associated
-#include <slimlog/util/types.h>
-#include <slimlog/util/unicode.h>
+#include "slimlog/pattern.h" // IWYU pragma: associated
+#include "slimlog/util/types.h"
+#include "slimlog/util/unicode.h"
 
 #include <algorithm>
 #include <climits>

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <slimlog/level.h>
+#include "slimlog/level.h"
 
 #include <atomic>
 #include <chrono>
@@ -131,5 +131,5 @@ struct Record {
 } // namespace SlimLog
 
 #ifdef SLIMLOG_HEADER_ONLY
-#include <slimlog/record-inl.h> // IWYU pragma: keep
+#include "slimlog/record-inl.h" // IWYU pragma: keep
 #endif
