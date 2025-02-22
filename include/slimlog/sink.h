@@ -9,7 +9,6 @@
 #include "slimlog/level.h"
 #include "slimlog/location.h"
 #include "slimlog/pattern.h"
-#include "slimlog/policy.h"
 #include "slimlog/record.h"
 #include "slimlog/util/types.h"
 
@@ -169,7 +168,9 @@ private:
 template<class T>
 concept IsFormattableSink = requires(const T& arg) {
     []<typename String, typename Char, std::size_t BufferSize, typename Allocator>(
-        const FormattableSink<String, Char, BufferSize, Allocator>&) {}(arg);
+        const FormattableSink<String, Char, BufferSize, Allocator>&) {
+        /* For clang-format < 19 */
+    }(arg);
 };
 
 /**
@@ -375,7 +376,7 @@ protected:
      * @param location The source code location where the log record is created.
      * @return A new log record of type `RecordType`.
      */
-    static auto
+    static auto // For clang-format < 19
     create_record(Level level, StringViewType category, Location location) -> RecordType;
 
 private:

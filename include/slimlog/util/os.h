@@ -12,9 +12,11 @@
 
 #include <chrono>
 #include <ctime>
-#include <ratio>
 #include <tuple>
 #include <utility>
+
+// Used by <chrono> in C++20
+// IWYU pragma: no_include <ratio>
 
 #ifdef _WIN32
 #ifndef NOMINMAX

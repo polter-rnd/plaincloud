@@ -36,7 +36,7 @@ jobs:
             cpp_compiler: g++
           - os: ubuntu-24.04
             c_compiler: clang
-            cpp_compiler: clang++
+            cpp_compiler: clang++-19
           - os: macos-15
             c_compiler: clang
             cpp_compiler: clang++
@@ -73,7 +73,29 @@ jobs:
 
     - name: Install dependencies (Linux)
       if: runner.os == 'Linux'
-      run: sudo apt-get install -y libfmt-dev clang-tidy clang-format cmake-format cppcheck iwyu libc++-dev libc++abi-dev
+      run: |
+        sudo apt-get install -y clang-tidy-19 clang-format-19 libclang-19-dev \
+                                libc++-dev libc++abi-dev libfmt-dev cmake-format cppcheck
+
+    - name: Cache IWYU (Linux)
+      id: cache-iwyu
+      uses: actions/cache@v4
+      with:
+        path: /opt/iwyu
+        key: ${{ runner.os }}-iwyu-clang19
+
+    - name: Install IWYU (Linux)
+      if: runner.os == 'Linux' && steps.cache-iwyu.outputs.cache-hit != 'true'
+      run: |
+        cd ..
+        git clone https://github.com/include-what-you-use/include-what-you-use.git -b clang_19
+        cd include-what-you-use
+        mkdir build && cd build
+        cmake -DCMAKE_PREFIX_PATH=/usr/lib/llvm-19 \
+              -DIWYU_RESOURCE_RELATIVE_TO=iwyu \
+              -DIWYU_RESOURCE_DIR=../share/include-what-you-use \
+              -DCMAKE_INSTALL_PREFIX=/opt/iwyu ..
+        make -j && sudo make install
 
     - name: Install dependencies (Windows)
       if: runner.os == 'Windows' && matrix.format_lib == 'fmtlib'
@@ -99,8 +121,9 @@ jobs:
         -DENABLE_ANALYZERS=ON
         -DENABLE_FORMATTERS=ON
         -DENABLE_SANITIZERS=ON
+        ${{ runner.os == 'Linux' && '-DIwyu_EXECUTABLE=/opt/iwyu/bin/include-what-you-use' || '' }}
         ${{ matrix.format_lib == 'std' && '-DENABLE_FMTLIB_HO=OFF' || '' }}
-        ${{ matrix.cpp_compiler == 'clang++' && '-DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-lc++abi"' || '' }}
+        ${{ matrix.c_compiler == 'clang' && '-DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-lc++abi"' || '' }}
         -S ${{ github.workspace }}
 
     - name: Check formatting

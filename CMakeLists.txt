@@ -63,7 +63,7 @@ if(ENABLE_FORMATTERS)
     add_code_format_targets(
         CHECK_TARGET formatcheck
         FORMAT_TARGET format
-        SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+        SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src
         EXCLUDE_DIRS ${CMAKE_BINARY_DIR}
     )
 endif()
@@ -80,7 +80,7 @@ if(ENABLE_ANALYZERS)
     set(CPPCHECK_MIN_VERSION 2.10)
     set(CLANG_TIDY_MIN_VERSION 17.0)
     set(CLANG_FORMAT_MIN_VERSION 17.0)
-    set(IWYU_MIN_VERSION 0.21)
+    set(IWYU_MIN_VERSION 0.23)
     include(StaticCodeAnalysis)
     enable_static_code_analysis(
         CLANG_TIDY_EXTRA_ARGS -header-filter=.*

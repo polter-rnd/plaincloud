@@ -18,6 +18,7 @@
 #include <iterator>
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
 
 namespace SlimLog::Util::Unicode {
 

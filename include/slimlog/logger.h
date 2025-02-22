@@ -139,7 +139,7 @@ public:
      * @return Shared pointer to the created sink.
      */
     template<
-        template<typename, typename, std::size_t, typename>
+        template<typename, typename, std::size_t, typename> // For clang-format < 19
         typename T,
         std::size_t SinkBufferSize = DefaultBufferSize,
         typename SinkAllocator = Allocator,

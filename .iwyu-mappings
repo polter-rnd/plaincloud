@@ -8,17 +8,22 @@
     { include: [ "@<__mutex/.*>", "private", "<mutex>", "public" ] },
     { include: [ "@<__exception/.*>", "private", "<exception>", "public" ] },
     { include: [ "@<__system_error/.*>", "private", "<system_error>", "public" ] },
+    { include: [ "@<__ostream/.*>", "private", "<ostream>", "public" ] },
     { include: [ "<__fwd/string_view.h>", "private", "<string_view>", "public" ] },
     { include: [ "<__hash_table>", "private", "<unordered_map>", "public" ] },
     { include: [ "<__hash_table>", "private", "<unordered_set>", "public" ] },
     { include: [ "<__locale>", "private", "<locale>", "public" ] },
     # Bug on stdlibc++: std::tm is not from <cwchar>
-    { symbol: [ "std::tm", "private", "<ctime>", "public" ] },
-    # Bug on stdlibc++ w/o fmtlib: std::pair is not from <iterator>
+    #{ symbol: [ "std::tm", "private", "<ctime>", "public" ] },
+    # Bug on stdlibc++: std::nullptr_t is not from <version>
+    { symbol: [ "std::nullptr_t", "private", "<cstddef>", "public" ] },
+    # Bug on stdlibc++: std::pair is not from <iterator>
     { symbol: [ "std::pair", "private", "<utility>", "public" ] },
+    # Bug on stdlibc++ with fmtlib: std::vector is not from <format>
+    { symbol: [ "std::vector", "private", "<vector>", "public" ] },
     # Bug on libc++ w/o fmtlib: std::reference_wrapper is not from <type_traits>
-    { symbol: [ "std::reference_wrapper", "private", "<functional>", "public" ] },
-    { symbol: [ "std::copy", "private", "<algorithm>", "public" ] },
+    #{ symbol: [ "std::reference_wrapper", "private", "<functional>", "public" ] },
+    #{ symbol: [ "std::copy", "private", "<algorithm>", "public" ] },
     # Bug on fmtlib: format_error::~format_error is not from "format.h"
     { include: [ "\"format.h\"", "private", "\"slimlog/format.h\"", "public" ] },
 ]
