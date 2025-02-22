@@ -15,6 +15,7 @@
 #else
 #include <fmt/core.h>
 #endif
+#include <chrono>
 #else
 #include <array>
 #endif

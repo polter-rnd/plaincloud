@@ -10,11 +10,7 @@
 #include "slimlog/sink.h" // IWYU pragma: associated
 #include "slimlog/util/os.h"
 
-#ifndef SLIMLOG_HEADER_ONLY
-#include "slimlog/logger.h"
-#endif
-
-#include <algorithm> // IWYU pragma: keep
+#include <algorithm>
 #include <iterator>
 #include <tuple>
 

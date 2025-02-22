@@ -22,7 +22,6 @@
 #include <format>
 #endif
 
-#include <chrono>
 #include <concepts>
 #include <cstring>
 #include <iterator>

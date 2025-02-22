@@ -8,7 +8,6 @@
 #include "slimlog/sink.h"
 #include "slimlog/util/types.h"
 
-#include <string_view>
 #include <utility>
 
 namespace SlimLog {

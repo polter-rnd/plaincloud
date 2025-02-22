@@ -5,11 +5,12 @@
 
 #pragma once
 
-#include <algorithm> // IWYU pragma: keep
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>
 #include <type_traits>
+#include <utility>
 
 #ifdef SLIMLOG_FMTLIB
 #if __has_include(<fmt/base.h>)

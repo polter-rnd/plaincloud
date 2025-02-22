@@ -12,7 +12,6 @@
 
 #include <chrono>
 #include <ctime>
-#include <ratio>
 #include <tuple>
 #include <utility>
 

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cassert>
+#include <string_view>
 #include <type_traits>
 
 namespace SlimLog::Util::Types {
